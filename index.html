@@ -1,1 +1,710 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+  <title>Super Mini | المنصة المالية المشفرة</title>
+  <style>
+    :root {
+      --bg-main: #050811;
+      --card-bg: rgba(15, 23, 42, 0.94);
+      --card-border: rgba(245, 158, 11, 0.35);
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --accent-gold: #f59e0b;
+      --accent-gold-glow: rgba(245, 158, 11, 0.5);
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --qi-color: #fbbc04;
+      --shadow-lux: 0 12px 35px -5px rgba(0, 0, 0, 0.8), 0 0 20px rgba(245, 158, 11, 0.2);
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    html, body { 
+      height: 100%; 
+      background-color: var(--bg-main); 
+      color: var(--text-main); 
+      display: flex; 
+      justify-content: center; 
+      overflow: hidden; 
+      touch-action: pan-x pan-y; 
+      overscroll-behavior: none;
+    }
+    
+    .app-container { width: 100%; max-width: 440px; height: 100%; background: var(--bg-main); position: relative; display: none; flex-direction: column; border-left: 1px solid var(--card-border); border-right: 1px solid var(--card-border); }
+    .app-container.logged-in { display: flex; animation: fadeInApp 0.4s ease-out; }
+    @keyframes fadeInApp { from { opacity: 0; } to { opacity: 1; } }
+
+    .scrollable-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 100px; padding-top: env(safe-area-inset-top); will-change: scroll-position; }
+
+    /* الإشعارات */
+    #toastContainer { position: fixed; top: env(safe-area-inset-top, 20px); left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px; }
+    .toast-msg { padding: 14px 20px; border-radius: 14px; color: #fff; font-weight: 900; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); opacity: 0; transform: translateY(-20px) scale(0.95); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); }
+    .toast-success { background: rgba(16, 185, 129, 0.95); }
+    .toast-error { background: rgba(239, 68, 68, 0.95); }
+    .toast-show { opacity: 1; transform: translateY(0) scale(1); }
+
+    /* إشعار الشحن */
+    .live-topup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 10000; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.4s; }
+    .live-topup-card { background: linear-gradient(180deg, #1e1b4b, #050811); border: 2px solid var(--accent-gold); border-radius: 30px; padding: 40px 20px; text-align: center; width: 90%; max-width: 360px; box-shadow: 0 0 50px rgba(245, 158, 11, 0.4); transform: scale(0.8); transition: transform 0.5s; }
+    .live-topup-overlay.show { opacity: 1; display: flex; }
+    .live-topup-overlay.show .live-topup-card { transform: scale(1); }
+
+    /* شريط التنقل السفلي الثابت (أفقي ومستقر بدون تقلص أو اهتزاز) */
+    .nav-bar { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(11, 17, 32, 0.98); display: flex; justify-content: space-around; align-items: center; height: 75px; padding-bottom: env(safe-area-inset-bottom, 10px); border-top: 1px solid var(--card-border); z-index: 9000; box-shadow: 0 -5px 25px rgba(0,0,0,0.8); }
+    .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-muted); gap: 5px; text-decoration: none; font-weight: 800; cursor: pointer; border: none; background: transparent; flex: 1; transition: color 0.2s; }
+    .nav-btn.active { color: var(--accent-gold); }
+    .nav-btn.active svg { fill: var(--accent-gold); filter: drop-shadow(0 0 5px var(--accent-gold-glow)); }
+    .nav-svg { width: 22px; height: 22px; fill: var(--text-muted); transition: fill 0.2s; }
+
+    /* واجهة الدخول */
+    .login-overlay { position: fixed; inset: 0; background: radial-gradient(circle at 50% 20%, #0f172a 0%, #050811 75%, #000 100%); display: flex; justify-content: center; align-items: center; padding: 20px; z-index: 9999; }
+    .vault-card { width: 100%; max-width: 410px; background: linear-gradient(180deg, rgba(17, 24, 39, 0.96) 0%, rgba(7, 10, 19, 0.99) 100%); border: 1px solid var(--card-border); border-radius: 36px; padding: 32px 24px; box-shadow: var(--shadow-lux); text-align: center; }
+    .vault-emblem-ring { width: 80px; height: 80px; margin: 0 auto 12px auto; border-radius: 26px; padding: 3px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(255, 255, 255, 0.05), rgba(245, 158, 11, 0.3)); }
+    .vault-emblem-ring img { width: 100%; height: 100%; border-radius: 23px; object-fit: cover; background: #040711; }
+    .vault-input-group { margin-bottom: 16px; text-align: right; }
+    .vault-input-shell input, .admin-input-full, .select-css { width: 100%; padding: 16px; background: rgba(3, 7, 18, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: #ffffff; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .vault-input-shell input:focus, .admin-input-full:focus { border-color: var(--accent-gold); }
+
+    /* الأزرار الثابتة */
+    .btn-ultra { width: 100%; padding: 16px; border-radius: 16px; font-weight: 900; font-size: 14px; cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: transform 0.1s; }
+    .btn-ultra:active { transform: scale(0.97); }
+    .btn-gold { background: linear-gradient(135deg, #fbbf24, #d97706, #92400e); color: #fff; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3); }
+    .btn-green { background: linear-gradient(135deg, #10b981, #047857); color: #fff; }
+    .btn-red { background: linear-gradient(135deg, #ef4444, #991b1b); color: #fff; }
+    .btn-outline { background: rgba(255,255,255,0.03); color: var(--text-main); border: 1px solid var(--card-border); }
+
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: var(--bg-main); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+    .tab-content { display: none; opacity: 0; padding-bottom: 20px; }
+    .tab-content.active { display: block; opacity: 1; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* السلايدر والبورصة */
+    .slider-wrapper { position: relative; width: calc(100% - 32px); height: 180px; margin: 16px auto; border-radius: 22px; overflow: hidden; border: 1px solid var(--card-border); box-shadow: var(--shadow-lux); }
+    .slides-container { display: flex; width: 100%; height: 100%; transition: transform 0.5s ease-in-out; }
+    .slide-item { min-width: 100%; height: 100%; position: relative; }
+    .slide-item img { width: 100%; height: 100%; object-fit: cover; }
+    .slide-caption { position: absolute; inset: 0; background: linear-gradient(to top, rgba(5, 8, 17, 0.95), rgba(5, 8, 17, 0.1)); display: flex; flex-direction: column; justify-content: flex-end; padding: 16px; }
+    .slide-caption h3 { font-size: 16px; font-weight: 900; color: var(--accent-gold); }
+    .slide-caption p { font-size: 11px; color: #d1d5db; margin-top: 2px; }
+
+    /* قسم المالية الفاخر */
+    .finance-card { background: linear-gradient(180deg, rgba(20,29,51,0.96), rgba(9,14,26,0.99)); border: 1px solid var(--card-border); border-radius: 22px; padding: 18px; margin: 16px; box-shadow: var(--shadow-lux); }
+    .finance-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .finance-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #fff; }
+    .qi-bg { background: #1e293b; border: 2px solid var(--qi-color); color: var(--qi-color); }
+    .zain-bg { background: linear-gradient(135deg, #d946ef, #8b5cf6); }
+    .card-display-box { background: #000; border: 2px solid var(--accent-gold); border-radius: 16px; padding: 14px; text-align: center; margin: 10px 0; }
+    .card-number-val { font-size: 22px; font-weight: 900; color: #fff; letter-spacing: 2px; }
+    .warning-note { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--accent-red); color: #fca5a5; font-size: 11.5px; font-weight: 800; padding: 9px 12px; border-radius: 12px; margin: 10px 0; text-align: center; }
+    .step-list { background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 12px 14px; font-size: 12px; line-height: 1.8; text-align: right; color: #cbd5e1; }
+    .step-list strong { color: var(--accent-gold); }
+
+    .account-card { background: rgba(15, 23, 42, 0.6); margin: 0 16px 16px 16px; padding: 18px; border-radius: 22px; border: 1px solid var(--card-border); box-shadow: var(--shadow-lux); }
+    .section-head { font-size: 16px; font-weight: 900; margin: 24px 16px 14px 16px; color: var(--accent-gold); }
+
+    /* التصميم الفاخر للباقات المطابق للصورة تماماً */
+    .packages-list { display: flex; flex-direction: column; gap: 20px; padding: 0 16px; }
+    .lux-pkg-card { background: #0b1120; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 24px; position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.7); display: flex; flex-direction: column; }
+    .lux-pkg-header { background: linear-gradient(90deg, #d97706, #f59e0b, #d97706); color: #fff; text-align: center; padding: 10px 0; font-size: 12px; font-weight: 900; letter-spacing: 2px; border-top-left-radius: 23px; border-top-right-radius: 23px; box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3); }
+    .lux-pkg-body { padding: 24px 20px 20px; text-align: center; position: relative; }
+    .lux-price { font-size: 52px; font-weight: 900; color: #f59e0b; font-family: Impact, sans-serif; letter-spacing: 2px; line-height: 1; text-shadow: 0 5px 15px rgba(245, 158, 11, 0.3); margin-bottom: 4px; }
+    .lux-curr { font-size: 16px; font-weight: 900; color: #fcd34d; margin-bottom: 24px; letter-spacing: 1px; }
+    .lux-stats-box { display: grid; grid-template-columns: 1fr 1fr; background: #000000; border-radius: 16px; padding: 16px 0; margin-bottom: 24px; box-shadow: inset 0 0 15px rgba(255,255,255,0.02); }
+    .lux-stat { display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .lux-stat.border-left { border-left: 1px solid rgba(255,255,255,0.1); }
+    .lux-stat-title { font-size: 11.5px; color: #9ca3af; font-weight: 800; margin-bottom: 6px; }
+    .lux-stat-val { font-size: 18px; font-weight: 900; font-family: monospace; }
+    .text-green { color: #10b981; }
+    .text-gold { color: #f59e0b; }
+    .active-badge { position: absolute; top: 14px; left: 14px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 10px; font-weight: bold; padding: 6px 12px; border-radius: 10px; backdrop-filter: blur(4px); z-index: 5; }
+
+    /* لوحة الأدمن */
+    .admin-card { background: linear-gradient(180deg, #1e1b4b, rgba(15, 23, 42, 0.98)); border: 2px solid var(--accent-gold); border-radius: 22px; margin: 16px; padding: 16px; box-shadow: 0 0 35px rgba(245, 158, 11, 0.2); display: none; }
+    .admin-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .a-stat-box { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px; text-align: center; }
+    .a-stat-num { font-size: 18px; font-weight: 900; color: var(--accent-gold); }
+    .a-stat-label { font-size: 10px; color: #9ca3af; font-weight: bold; margin-top: 4px; }
+    .admin-user-row { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.08); border-right: 4px solid var(--accent-gold); border-radius: 16px; padding: 14px; margin-bottom: 14px; }
+    .admin-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .admin-btn { padding: 10px; border-radius: 10px; font-size: 11px; font-weight: 900; border: none; cursor: pointer; color: white; }
+
+    .timer-boxes { display: flex; gap: 12px; justify-content: center; }
+    .timer-box-item { background: rgba(0,0,0,0.7); border: 1px solid rgba(245,158,11,0.5); border-radius: 12px; width: 60px; height: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .timer-val { font-size: 22px; font-weight: 900; color: #fff; text-shadow: 0 0 10px var(--accent-gold-glow); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+
+  <div id="toastContainer"></div>
+
+  <!-- إشعار الشحن -->
+  <div class="live-topup-overlay" id="liveTopupOverlay">
+    <div class="live-topup-card">
+      <div class="topup-icon">💰</div>
+      <h2 style="color: var(--accent-gold); font-size: 24px; font-weight: 900; margin-bottom: 10px;">تم شحن حسابك!</h2>
+      <div style="font-size: 32px; font-weight: 900; color: var(--accent-green); margin-bottom: 10px;" id="topupAmountVal">0 IQD</div>
+      <p style="color: #cbd5e1; font-size: 13px; font-weight: bold;">تمت إضافة المبلغ إلى رصيدك بنجاح، يمكنك الآن استثماره.</p>
+      <button class="btn-ultra btn-gold" style="margin-top: 20px;" onclick="closeTopupNotification()">موافق، شكراً!</button>
+    </div>
+  </div>
+
+  <!-- واجهة الدخول -->
+  <div class="login-overlay" id="loginModal">
+    <div class="vault-card">
+      <div class="vault-emblem-ring"><img src="8001.png" onerror="this.src='https://via.placeholder.com/82/050811/f59e0b?text=SM'"></div>
+      <div style="font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 24px;">Super <span style="color:var(--accent-gold);">Mini</span></div>
+      <div class="vault-input-group">
+        <div class="vault-input-shell"><input type="text" id="userInput" placeholder="معرّف الحساب المالي (الهاتف)" autocomplete="off"></div>
+      </div>
+      <div class="vault-input-group">
+        <div class="vault-input-shell"><input type="password" id="passInput" placeholder="الرمز السري المشفر" autocomplete="off"></div>
+      </div>
+      <button class="btn-ultra btn-gold" id="loginBtn" onclick="handleSecureLogin()">تسجيل الدخول الآمن</button>
+      <button class="btn-ultra btn-outline" style="margin-top: 12px;" onclick="document.getElementById('registerModal').style.display='flex'">إنشاء حساب استثماري</button>
+    </div>
+  </div>
+
+  <!-- إنشاء حساب -->
+  <div class="login-overlay" id="registerModal" style="display:none; background: rgba(0,0,0,0.95);">
+    <div class="vault-card">
+      <h2 style="color: var(--accent-gold); margin-bottom: 20px;">حساب جديد</h2>
+      <input type="tel" id="regUser" class="admin-input-full" style="padding:16px; margin-bottom:16px;" placeholder="رقم الهاتف (11 رقم)" maxlength="11">
+      <input type="password" id="regPass" class="admin-input-full" style="padding:16px; margin-bottom:16px;" placeholder="كلمة السر">
+      <button class="btn-ultra btn-green" onclick="handleRegister()">تأكيد وإنشاء الحساب</button>
+      <button class="btn-ultra btn-outline" style="margin-top:10px;" onclick="document.getElementById('registerModal').style.display='none'">إلغاء</button>
+    </div>
+  </div>
+
+  <!-- التطبيق الرئيسي -->
+  <div class="app-container" id="appContent">
+    <div class="header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <img src="8001.png" onerror="this.src='https://via.placeholder.com/32/050811/f59e0b?text=SM'" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--accent-gold);">
+        <div style="font-size: 18px; font-weight: 900; color: #fff;">Super <span style="color: var(--accent-gold);">Mini</span></div>
+      </div>
+    </div>
+
+    <!-- منطقة المحتوى -->
+    <div class="scrollable-content">
+      
+      <!-- 1. الرئيسية -->
+      <div id="tabHome" class="tab-content active">
+        <div class="slider-wrapper">
+          <div class="slides-container" id="slidesTrack">
+            <div class="slide-item"><img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=80"><div class="slide-caption"><h3>تداول رقمي واحترافي</h3><p>أعلى عوائد استثمارية بخطط 90 يوماً</p></div></div>
+            <div class="slide-item"><img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80"><div class="slide-caption"><h3>نمو الأرباح اليومية</h3><p>عوائد تنزل تلقائياً في محفظتك</p></div></div>
+          </div>
+        </div>
+
+        <div class="account-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="font-size: 13px; font-weight: 800;">حساب: <strong id="userDisplay">--</strong></div>
+            <div style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 800;">VIP</div>
+          </div>
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 14px; padding: 14px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: var(--text-muted); font-weight: 700;">رصيد المحفظة:</span>
+            <span style="font-size: 20px; color: var(--accent-green); font-weight: 900;" id="homeUserBalance">0 IQD</span>
+          </div>
+        </div>
+
+        <!-- لوحة الأدمن -->
+        <div class="admin-card" id="adminPanel">
+          <div style="font-size: 16px; font-weight: 900; color: var(--accent-gold); text-align: center; margin-bottom: 12px;">👑 لوحة تحكم الإدارة (Dashboard)</div>
+          <div class="admin-stats-grid">
+            <div class="a-stat-box"><div class="a-stat-num" id="statUsers">0</div><div class="a-stat-label">المشتركين</div></div>
+            <div class="a-stat-box"><div class="a-stat-num" id="statSubs" style="color:var(--accent-green);">0</div><div class="a-stat-label">أعضاء فاعلين</div></div>
+            <div class="a-stat-box"><div class="a-stat-num" id="statReqs" style="color:#ef4444;">0</div><div class="a-stat-label">طلبات سحب</div></div>
+          </div>
+          <button class="btn-ultra btn-green" style="margin-bottom:16px; font-size: 13px;" onclick="distributeProfitsManual()">⚡ ضخ أرباح اليوم للجميع الآن</button>
+          <div id="adminUserList"></div>
+        </div>
+
+        <div class="section-head">🔥 أقوى باقات الاستثمار (90 يوم)</div>
+        <div class="packages-list" id="pkgContainer"></div>
+      </div>
+
+      <!-- 2. السحب -->
+      <div id="tabWithdraw" class="tab-content">
+        <div class="account-card" style="border-color: var(--accent-gold); margin-top: 16px;">
+          <h3 style="color: var(--accent-gold); font-size: 18px; margin-bottom: 6px; text-align: center; font-weight: 900;">💸 طلب سحب الأرباح والأموال</h3>
+          <p style="font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 16px;">اختر طريقة السحب وأدخل البيانات الخاصة بك لاستلام الأرباح</p>
+
+          <div class="vault-input-group">
+            <label style="display:block; font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">اختر طريقة الاستلام السريع</label>
+            <select class="select-css" id="withdrawMethodSelect">
+              <option value="ZainCash (زين كاش)">ZainCash (زين كاش)</option>
+              <option value="QiCard (بطاقة كي كارد)">Qi Card (بطاقة كي كارد)</option>
+            </select>
+          </div>
+          <div class="vault-input-group">
+            <label style="display:block; font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">رقم المحفظة أو البطاقة للاستلام</label>
+            <input type="text" class="admin-input-full" id="withdrawAccountNum" placeholder="أدخل رقم المحفظة أو البطاقة">
+          </div>
+          <div class="vault-input-group">
+            <label style="display:block; font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">المبلغ المراد سحبه (IQD)</label>
+            <input type="number" class="admin-input-full" id="withdrawAmount" placeholder="الحد الأدنى 10,000 IQD">
+          </div>
+          <button class="btn-ultra btn-gold" id="btnWithdraw" onclick="processWithdrawalRequest(this)">تأكيد وإرسال طلب السحب</button>
+        </div>
+
+        <div class="section-head">سجل طلبات السحب الخاصة بك</div>
+        <div style="padding: 0 16px;" id="withdrawHistoryContainer"></div>
+      </div>
+
+      <!-- 3. المالية (الشحن وزر التلجرام للوصل) -->
+      <div id="tabFinance" class="tab-content">
+        <div class="account-card" style="border-color: var(--accent-gold); margin-top: 16px; text-align: center;">
+          <div style="font-size: 12px; color: var(--text-muted); font-weight: bold;">الرصيد المتاح للاشتراك في الباقات:</div>
+          <div style="font-size: 26px; font-weight: 900; color: var(--accent-green); margin-top: 4px;" id="financeBalance">0 IQD</div>
+        </div>
+
+        <!-- 1. بطاقة سوبر كي -->
+        <div class="finance-card">
+          <div class="finance-head">
+            <div class="finance-icon qi-bg">Qi</div>
+            <div>
+              <div style="font-weight: 900; font-size: 15px;">بطاقة سوبر كي (Qi Card)</div>
+              <div style="font-size: 11px; color: var(--accent-gold);">تحويل مباشر من بطاقتك إلى بطاقة المنصة</div>
+            </div>
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-muted); font-weight: bold; text-align: right;">رقم بطاقة المنصة المطلوب التحويل إليها:</div>
+          <div class="card-display-box">
+            <div class="card-number-val">5143617453</div>
+          </div>
+          <button class="btn-ultra btn-gold" style="padding: 12px; margin-bottom: 10px;" onclick="navigator.clipboard.writeText('5143617453'); showToast('✅ تم نسخ رقم البطاقة', 'success');">📋 نسخ رقم بطاقة المنصة</button>
+          <div class="warning-note">⚠️ التحويل يتم إلى رقم البطاقة أعلاه وليس إلى رقم الهاتف.</div>
+        </div>
+
+        <!-- 2. زين كاش -->
+        <div class="finance-card">
+          <div class="finance-head">
+            <div class="finance-icon zain-bg">Zain</div>
+            <div>
+              <div style="font-weight: 900; font-size: 15px;">زين كاش (ZainCash)</div>
+              <div style="font-size: 11px; color: #d946ef;">تحويل محفظة فوري عبر مسح الباركود</div>
+            </div>
+          </div>
+          <div style="text-align: center; margin: 8px 0;">
+            <div style="display: inline-block; background: #000; padding: 10px; border-radius: 18px; border: 1.5px dashed var(--accent-gold);">
+              <img src="8000.png" onerror="this.src='https://via.placeholder.com/155/000/f59e0b?text=باركود+زين+كاش'" style="max-width: 155px; height: auto; border-radius: 10px; display: block;" alt="باركود زين كاش">
+            </div>
+          </div>
+        </div>
+
+        <!-- زر التلجرام الذكي لإرسال الحوالة والرقم -->
+        <div style="padding: 0 16px; margin-bottom: 20px;">
+          <button class="btn-ultra btn-green" style="padding: 16px;" onclick="sendTelegramTransferProof()">
+            📲 إرسال وصل الحوالة ورقم هاتفك للدعم (Telegram)
+          </button>
+        </div>
+      </div>
+
+      <!-- 4. حسابي -->
+      <div id="tabProfile" class="tab-content">
+        <div class="account-card" style="margin-top: 16px;">
+          <div style="text-align: center; padding: 10px 0 16px;">
+            <div style="width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-gold), #78350f); display: flex; align-items: center; justify-content: center; font-size: 32px; border: 2px solid rgba(255,255,255,0.2);">👤</div>
+            <h3 id="profName" style="font-size: 19px; font-weight: 900;">--</h3>
+            <p style="color: var(--accent-green); font-size: 11.5px; font-weight: bold; margin-top: 4px;">عضوية استثمارية موثقة ومعتمدة ✓</p>
+          </div>
+
+          <div style="background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(15,23,42,0.8)); border: 1px solid var(--card-border); border-radius: 18px; padding: 16px; text-align: center;">
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: bold;">الرصيد الإجمالي المتاح حالياً</span>
+            <div style="font-size: 26px; font-weight: 900; color: var(--accent-green); margin: 6px 0;" id="profBalance">0 IQD</div>
+          </div>
+
+          <div style="background: linear-gradient(135deg, rgba(15,23,42,0.8), rgba(0,0,0,0.5)); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 16px; padding: 14px; margin-top: 16px; text-align: center;">
+            <div style="font-size: 11px; font-weight: bold; color: var(--text-muted); margin-bottom: 10px;">⏳ الوقت لنزول الأرباح اليومية تلقائياً</div>
+            <div class="timer-boxes">
+              <div class="timer-box-item"><span class="timer-val" id="timer-h">00</span><span style="font-size:10px; color:var(--accent-gold);">ساعة</span></div>
+              <div class="timer-box-item"><span class="timer-val" id="timer-m">00</span><span style="font-size:10px; color:var(--accent-gold);">دقيقة</span></div>
+              <div class="timer-box-item"><span class="timer-val" id="timer-s">00</span><span style="font-size:10px; color:var(--accent-gold);">ثانية</span></div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px;">
+            <div class="account-card" style="margin:0; padding:12px; text-align:right;">
+              <div style="font-size: 11px; color: var(--text-muted); font-weight: bold;">الباقة الاستثمارية</div>
+              <div style="font-size: 13.5px; font-weight: 900; color: var(--accent-gold); margin-top: 4px;" id="pSubVal">لا يوجد اشتراك</div>
+            </div>
+            <div class="account-card" style="margin:0; padding:12px; text-align:right;">
+              <div style="font-size: 11px; color: var(--text-muted); font-weight: bold;">الأرباح اليومية</div>
+              <div style="font-size: 13.5px; font-weight: 900; color: var(--accent-green); margin-top: 4px;" id="pProfitVal">0 IQD</div>
+            </div>
+          </div>
+
+          <button class="btn-ultra btn-outline" style="margin-top: 16px; font-size: 12px;" onclick="navigator.clipboard.writeText(activeUser); showToast('✅ تم النسخ', 'success');">📋 نسخ معرّف الحساب المالي</button>
+          <button class="btn-ultra btn-red" style="margin-top: 10px;" onclick="localStorage.clear(); location.reload();">تسجيل الخروج من الحساب</button>
+        </div>
+      </div>
+
+    </div> <!-- نهاية Scrollable Content -->
+
+    <!-- شريط التنقل السفلي الثابت (أفقي ومستقر بدون تقلص) -->
+    <div class="nav-bar">
+      <button class="nav-btn active" onclick="switchTab('tabHome', this)">
+        <svg class="nav-svg" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>الرئيسية</span>
+      </button>
+      <button class="nav-btn" onclick="window.open('https://t.me/oosbsu', '_blank')">
+        <svg class="nav-svg" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span>الدعم</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('tabWithdraw', this)">
+        <svg class="nav-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg><span>السحب</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('tabFinance', this)">
+        <svg class="nav-svg" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>المالية</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('tabProfile', this)">
+        <svg class="nav-svg" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>حسابي</span>
+      </button>
+    </div>
+
+  </div> <!-- نهاية App Container -->
+
+  <script>
+    const DB_URL = "https://superminiapp-55204-default-rtdb.firebaseio.com";
+    const ADMIN_CREDENTIAL = "IJinsi_$97kb##ins";
+    let activeUser = null;
+    let localUsersData = {}; 
+    let lastKnownBalance = null;
+    let userPollingTimer = null;
+
+    const PKG_CONFIG = {
+      30000: 10000, 50000: 35000, 75000: 55000, 150000: 80000, 250000: 122000, 750000: 189000, 1000000: 380000
+    };
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast-msg toast-${type}`;
+      toast.innerText = message;
+      container.appendChild(toast);
+      requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('toast-show')));
+      setTimeout(() => { toast.classList.remove('toast-show'); setTimeout(() => toast.remove(), 300); }, 2500);
+    }
+
+    function showLiveTopupNotification(addedAmount) {
+      const overlay = document.getElementById('liveTopupOverlay');
+      document.getElementById('topupAmountVal').innerText = `+${addedAmount.toLocaleString()} IQD`;
+      overlay.classList.add('show');
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    }
+    function closeTopupNotification() {
+      document.getElementById('liveTopupOverlay').classList.remove('show');
+    }
+
+    // زر التلجرام الذكي لإرسال الوصل ورقم الهاتف المسجل
+    function sendTelegramTransferProof() {
+      const phoneNum = activeUser || "غير مسجل";
+      const message = encodeURIComponent(`مرحباً، لقد قمت بتحويل الأموال لطحن حسابي في منصة Super Mini.\n\n📱 رقم هاتفي المسجل بالمنصة: ${phoneNum}\n\n(يرجى إرفاق صورة لقطة شاشة وصل الحوالة هنا 👇)`);
+      window.open(`https://t.me/oosbsu?text=${message}`, '_blank');
+    }
+
+    function startMidnightTimer() {
+      setInterval(() => {
+        const now = new Date();
+        const midnight = new Date();
+        midnight.setHours(24, 0, 0, 0);
+        const diff = midnight - now;
+        document.getElementById('timer-h').innerText = Math.floor((diff % (1000*60*60*24)) / (1000*60*60)).toString().padStart(2, '0');
+        document.getElementById('timer-m').innerText = Math.floor((diff % (1000*60*60)) / (1000*60)).toString().padStart(2, '0');
+        document.getElementById('timer-s').innerText = Math.floor((diff % (1000*60)) / 1000).toString().padStart(2, '0');
+      }, 1000);
+    }
+
+    function startRealTimeUserPolling() {
+      if (activeUser === ADMIN_CREDENTIAL) return;
+      userPollingTimer = setInterval(async () => {
+        try {
+          const res = await fetch(`${DB_URL}/users/${activeUser}.json`);
+          const d = await res.json();
+          if(!d) return;
+          if(lastKnownBalance !== null && d.balance > lastKnownBalance) {
+            const added = d.balance - lastKnownBalance;
+            showLiveTopupNotification(added);
+            updateUIWithData(d);
+          }
+          lastKnownBalance = d.balance;
+        } catch(e) {}
+      }, 4000);
+    }
+
+    async function handleSecureLogin() {
+      const u = document.getElementById('userInput').value.trim();
+      const p = document.getElementById('passInput').value.trim();
+      if (!u || !p) { showToast("⚠️ يرجى كتابة الرقم وكلمة السر", "error"); return; }
+
+      if (u === ADMIN_CREDENTIAL && p === ADMIN_CREDENTIAL) {
+        activeUser = ADMIN_CREDENTIAL;
+        completeLogin();
+        return;
+      }
+
+      document.getElementById('loginBtn').innerText = "⏳ جاري التحقق...";
+      try {
+        const res = await fetch(`${DB_URL}/users.json`);
+        const data = await res.json();
+        const found = Object.keys(data || {}).find(k => k === u);
+        if (!found) { showToast("⚠️ الحساب غير موجود", "error"); document.getElementById('loginBtn').innerText = "تسجيل الدخول الآمن"; return; }
+        if (data[found].pass !== p) { showToast("⚠️ كلمة السر خطأ", "error"); document.getElementById('loginBtn').innerText = "تسجيل الدخول الآمن"; return; }
+        
+        activeUser = found;
+        completeLogin();
+      } catch (e) { showToast("⚠️ خطأ بالاتصال", "error"); document.getElementById('loginBtn').innerText = "تسجيل الدخول الآمن"; }
+    }
+
+    async function handleRegister() {
+      const u = document.getElementById('regUser').value.trim();
+      const p = document.getElementById('regPass').value.trim();
+      if (!u || !p || u.length !== 11) { showToast("⚠️ البيانات غير صحيحة", "error"); return; }
+      await fetch(`${DB_URL}/users/${u}.json`, { method: 'PUT', body: JSON.stringify({ pass: p, balance: 0, status: 'active', sub: 0 }) });
+      activeUser = u;
+      document.getElementById('registerModal').style.display='none';
+      completeLogin();
+      showToast("🎉 تم الإنشاء بنجاح", "success");
+    }
+
+    function completeLogin() {
+      localStorage.setItem('sm_u', activeUser);
+      document.getElementById('loginModal').style.display = 'none';
+      document.getElementById('appContent').classList.add('logged-in');
+      startMidnightTimer();
+
+      if (activeUser === ADMIN_CREDENTIAL) {
+        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('userDisplay').innerText = "Dashboard Admin";
+        loadAdmin();
+      } else {
+        document.getElementById('userDisplay').innerText = activeUser;
+        document.getElementById('profName').innerText = activeUser;
+        loadUserData();
+        startRealTimeUserPolling();
+      }
+      renderPackages();
+    }
+
+    async function loadUserData() {
+      const res = await fetch(`${DB_URL}/users/${activeUser}.json`);
+      const d = await res.json() || {};
+      lastKnownBalance = d.balance || 0;
+      updateUIWithData(d);
+    }
+
+    function updateUIWithData(d) {
+      const balStr = Number(d.balance || 0).toLocaleString() + " IQD";
+      document.getElementById('homeUserBalance').innerText = balStr;
+      document.getElementById('financeBalance').innerText = balStr;
+      document.getElementById('profBalance').innerText = balStr;
+
+      const subAmt = Number(d.sub || 0);
+      if (subAmt > 0) {
+        const daily = PKG_CONFIG[subAmt] || 0;
+        document.getElementById('pSubVal').innerText = `باقة ${subAmt.toLocaleString()} IQD`;
+        document.getElementById('pProfitVal').innerText = `${daily.toLocaleString()} IQD / يومياً`;
+      } else {
+        document.getElementById('pSubVal').innerText = "لا يوجد اشتراك مفعل";
+        document.getElementById('pProfitVal').innerText = "0 IQD";
+      }
+
+      const ws = d.withdraws || [];
+      renderWithdrawHistory(ws);
+    }
+
+    async function loadAdmin() {
+      const res = await fetch(`${DB_URL}/users.json`);
+      localUsersData = await res.json() || {};
+      renderAdminUI();
+    }
+
+    function renderAdminUI() {
+      const box = document.getElementById('adminUserList');
+      const keys = Object.keys(localUsersData).filter(k => k !== ADMIN_CREDENTIAL);
+      
+      document.getElementById('statUsers').innerText = keys.length;
+      document.getElementById('statSubs').innerText = keys.filter(k => localUsersData[k].sub > 0).length;
+      document.getElementById('statReqs').innerText = keys.filter(k => localUsersData[k].withdraws && localUsersData[k].withdraws.some(w => w.status.includes('🔴'))).length;
+
+      box.innerHTML = keys.map(ph => {
+        const u = localUsersData[ph];
+        let withdrawAuditHTML = '';
+        if (u.withdraws && u.withdraws.length) {
+          const w = u.withdraws[0];
+          withdrawAuditHTML = `
+            <div style="margin-top:12px; padding:12px; background:rgba(0,0,0,0.6); border-radius:12px; border:1px dashed var(--accent-gold);">
+              <div style="font-size:12px; color:#fff; margin-bottom:8px;">💸 طلب سحب: <strong style="color:var(--accent-green);">${Number(w.amount).toLocaleString()} IQD</strong> <br><span style="font-size:10px; color:#9ca3af;">الوسيلة: ${w.method} | الحالة: ${w.status}</span></div>
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                <button class="admin-btn" style="background:#10b981;" onclick="adminAuditStatus('${ph}', 'تم التحويل بنجاح 🟢')">✅ تدقيق قبول</button>
+                <button class="admin-btn" style="background:#ef4444;" onclick="adminAuditStatus('${ph}', 'مرفوض ❌')">❌ تدقيق رفض</button>
+              </div>
+            </div>`;
+        }
+
+        return `
+          <div class="admin-user-row" id="admin_row_${ph}">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px;">
+              <span style="font-size:13px; font-weight:900; color:#fff;">📱 ${ph}</span>
+              <span style="font-size:15px; font-weight:900; color:var(--accent-green);" id="admin_bal_${ph}">${Number(u.balance || 0).toLocaleString()} IQD</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">🔑 كلمة السر: <strong style="color:#ef4444; letter-spacing:1px;">${u.pass}</strong></div>
+            <div style="font-size:11px; color:#94a3b8; margin-bottom:8px;">الباقة: <strong style="color:var(--accent-gold);" id="admin_sub_${ph}">${u.sub ? Number(u.sub).toLocaleString() : 'لا يوجد'}</strong></div>
+            <input type="number" id="amt_${ph}" class="admin-input-full" placeholder="المبلغ (للشحن أو الخصم أو الباقة)" style="margin-bottom:8px;">
+            <div class="admin-actions-grid">
+              <button class="admin-btn" style="background: linear-gradient(135deg, #10b981, #047857);" onclick="adminAction('${ph}', 'add')">➕ شحن الحساب</button>
+              <button class="admin-btn" style="background: linear-gradient(135deg, #f97316, #c2410c);" onclick="adminAction('${ph}', 'sub')">➖ خصم</button>
+              <button class="admin-btn" style="background: linear-gradient(135deg, #f59e0b, #b45309); grid-column: span 2;" onclick="adminAction('${ph}', 'pack')">🚀 اشتراك بباقة (تفعيل إجباري)</button>
+              <button class="admin-btn" style="background: #64748b; grid-column: span 2;" onclick="adminAction('${ph}', 'del')">🗑️ حذف الحساب</button>
+            </div>
+            ${withdrawAuditHTML}
+          </div>`;
+      }).join('');
+    }
+
+    function adminAction(ph, action) {
+      const u = localUsersData[ph];
+      const input = document.getElementById(`amt_${ph}`);
+      const v = parseFloat(input ? input.value : 0);
+
+      if (action === 'add' || action === 'sub') {
+        if (!v) { showToast("أدخل مبلغاً أولاً", "error"); return; }
+        u.balance = action === 'add' ? (u.balance || 0) + v : Math.max(0, (u.balance || 0) - v);
+        document.getElementById(`admin_bal_${ph}`).innerText = u.balance.toLocaleString() + ' IQD';
+        input.value = ''; showToast(`✅ تم ${action==='add'?'الشحن':'الخصم'} للزبون`, "success");
+        fetch(`${DB_URL}/users/${ph}.json`, { method: 'PATCH', body: JSON.stringify({ balance: u.balance }) });
+      } 
+      else if (action === 'pack') {
+        if (!v) { showToast("أدخل مبلغ الباقة", "error"); return; }
+        u.sub = v; document.getElementById(`admin_sub_${ph}`).innerText = v.toLocaleString();
+        input.value = ''; showToast("✅ تم تفعيل الباقة", "success");
+        fetch(`${DB_URL}/users/${ph}.json`, { method: 'PATCH', body: JSON.stringify({ sub: v }) });
+      }
+      else if (action === 'del') {
+        if(!confirm("حذف نهائي؟")) return;
+        document.getElementById(`admin_row_${ph}`).remove(); showToast("🗑️ تم الحذف", "info");
+        fetch(`${DB_URL}/users/${ph}.json`, { method: 'DELETE' });
+      }
+    }
+
+    function adminAuditStatus(ph, newStatus) {
+      const u = localUsersData[ph];
+      if (u.withdraws) {
+        u.withdraws[0].status = newStatus; showToast(`✅ تم تغيير حالة السحب إلى: ${newStatus}`, "success");
+        fetch(`${DB_URL}/users/${ph}.json`, { method: 'PATCH', body: JSON.stringify({ withdraws: u.withdraws }) });
+        setTimeout(loadAdmin, 1000);
+      }
+    }
+
+    async function distributeProfitsManual() {
+      showToast("⏳ جاري ضخ الأرباح...", "info");
+      const res = await fetch(`${DB_URL}/users.json`);
+      const users = await res.json() || {};
+      const today = new Date().toLocaleDateString();
+      let count = 0;
+      for (let ph of Object.keys(users)) {
+        if (ph === ADMIN_CREDENTIAL) continue;
+        const u = users[ph]; const profit = PKG_CONFIG[u.sub] || 0;
+        if (profit > 0 && u.lastProfitDate !== today) {
+          await fetch(`${DB_URL}/users/${ph}.json`, { method: 'PATCH', body: JSON.stringify({ balance: (u.balance || 0) + profit, lastProfitDate: today }) });
+          count++;
+        }
+      }
+      showToast(`🎉 تم ضخ الأرباح لـ ${count} مشترك!`, "success");
+      loadAdmin();
+    }
+
+    async function processWithdrawalRequest(btn) {
+      const m = document.getElementById('withdrawMethodSelect').value;
+      const n = document.getElementById('withdrawAccountNum').value.trim();
+      const a = parseFloat(document.getElementById('withdrawAmount').value);
+      if (!n || !a || a < 10000) { showToast("⚠️ الحد الأدنى 10,000 وتأكد من الرقم", "error"); return; }
+
+      btn.innerHTML = "⏳ جاري الإرسال..."; btn.disabled = true;
+      const res = await fetch(`${DB_URL}/users/${activeUser}.json`);
+      const u = await res.json() || {};
+      if ((u.balance || 0) < a) { showToast("⚠️ رصيدك غير كافٍ!", "error"); btn.innerHTML = "تأكيد وإرسال طلب السحب"; btn.disabled = false; return; }
+
+      const ws = u.withdraws || [];
+      ws.unshift({ amount: a, method: m, account: n, status: 'قيد التدقيق 🔴', date: new Date().toLocaleDateString('ar-IQ') });
+      await fetch(`${DB_URL}/users/${activeUser}.json`, { method: 'PATCH', body: JSON.stringify({ balance: (u.balance || 0) - a, withdraws: ws }) });
+
+      document.getElementById('withdrawAccountNum').value = ''; document.getElementById('withdrawAmount').value = '';
+      btn.innerHTML = "تأكيد وإرسال طلب السحب"; btn.disabled = false;
+      showToast("✅ تم إرسال الطلب، قيد التدقيق!", "success"); loadUserData();
+    }
+
+    function renderWithdrawHistory(ws) {
+      const box = document.getElementById('withdrawHistoryContainer');
+      if (!ws.length) { box.innerHTML = "<p style='font-size:12px; color:var(--text-muted); text-align:center;'>لا توجد عمليات</p>"; return; }
+      box.innerHTML = ws.map(w => {
+        let c = 'rgba(239, 68, 68, 0.15)'; let t = '#f87171';
+        if(w.status.includes('بنجاح')){ c = 'rgba(16, 185, 129, 0.15)'; t = '#34d399'; }
+        return `<div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.05); border-radius:14px; padding:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+          <div><div style="font-weight:bold; color:var(--accent-gold); font-size:12px;">${w.method}</div><div style="font-size:10px; color:var(--text-muted);">${w.account}</div></div>
+          <span style="background:${c}; color:${t}; padding:4px 10px; border-radius:8px; font-weight:bold; font-size:11px;">${w.status}</span>
+        </div>`;
+      }).join('');
+    }
+
+    const pkgList = [ { price: 30000, daily: 10000 }, { price: 50000, daily: 35000 }, { price: 75000, daily: 55000 }, { price: 150000, daily: 80000 }, { price: 250000, daily: 122000 }, { price: 750000, daily: 189000 }, { price: 1000000, daily: 380000 } ];
+    function renderPackages() {
+      document.getElementById('pkgContainer').innerHTML = pkgList.map((p, i) => `
+        <div class="lux-pkg-card">
+          <div class="lux-pkg-header">VIP INVESTMENT</div>
+          <div class="lux-pkg-body">
+            <div class="lux-price">${p.price.toLocaleString()}</div>
+            <div class="lux-curr">IQD</div>
+            <div class="lux-stats-box">
+              <div class="lux-stat border-left">
+                <div class="lux-stat-title">الربح الكلي</div>
+                <div class="lux-stat-val text-gold">${(p.daily * 90).toLocaleString()}</div>
+              </div>
+              <div class="lux-stat">
+                <div class="lux-stat-title">الربح اليومي</div>
+                <div class="lux-stat-val text-green">${p.daily.toLocaleString()}</div>
+              </div>
+            </div>
+            <button class="btn-ultra btn-gold" id="btn-pkg-${i}" onclick="buyPkg(${p.price}, 'btn-pkg-${i}')">اشترك الآن 🚀</button>
+          </div>
+        </div>`).join('');
+    }
+
+    async function buyPkg(cost, btnId) {
+      const btn = document.getElementById(btnId);
+      const res = await fetch(`${DB_URL}/users/${activeUser}.json`);
+      const u = await res.json() || {};
+      
+      if ((u.balance || 0) >= cost) {
+        btn.innerHTML = "⏳ جاري توثيق العقد..."; 
+        btn.style.pointerEvents = "none";
+        await fetch(`${DB_URL}/users/${activeUser}.json`, { method: 'PATCH', body: JSON.stringify({ balance: (u.balance || 0) - cost, sub: cost }) });
+        btn.innerHTML = "✅ تم توثيق عقد الاستثمار بنجاح"; 
+        btn.style.background = "linear-gradient(135deg, #10b981, #047857)";
+        btn.style.boxShadow = "0 0 20px rgba(16, 185, 129, 0.4)";
+        loadUserData();
+        setTimeout(() => renderPackages(), 4000); 
+      } else { 
+        showToast("⚠️ رصيدك غير كافٍ! يرجى شحن حسابك", "error"); 
+      }
+    }
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      if (btn) btn.classList.add('active');
+      document.querySelector('.scrollable-content').scrollTo(0, 0);
+    }
+
+    let sIdx = 0;
+    setInterval(() => {
+      sIdx = (sIdx + 1) % 2;
+      const track = document.getElementById('slidesTrack');
+      if(track) track.style.transform = `translateX(${sIdx * 100}%)`; 
+    }, 4000);
+
+    const savedUser = localStorage.getItem('sm_u');
+    if (savedUser) { activeUser = savedUser; completeLogin(); }
+  </script>
+</body>
+            </html>
