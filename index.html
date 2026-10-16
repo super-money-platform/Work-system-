@@ -41,7 +41,7 @@
             background-size: cover; z-index: -1; opacity: 0.5;
         }
 
-        /* --- الإشعارات و شاشة التحميل --- */
+        /* --- الإشعارات وشاشة التحميل --- */
         #app-splash { position: fixed; inset: 0; background: var(--bg-color); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; background-image: radial-gradient(circle at 50% 50%, rgba(0, 50, 150, 0.2) 0%, transparent 60%); }
         
         .toast-notification { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 12px; color: white; font-weight: 700; font-size: 13px; z-index: 100000; box-shadow: 0 8px 20px rgba(0,0,0,0.6); display: flex; align-items: center; gap: 10px; opacity: 0; width: 90%; max-width: 360px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(5px); }
@@ -80,7 +80,6 @@
 
         .btn-submit { width: 100%; padding: 14px; border-radius: 16px; border: none; background: linear-gradient(90deg, #0033ff, #00d2ff); color: #ffffff; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 0 15px rgba(0, 150, 255, 0.4); }
         .btn-submit:active { transform: scale(0.98); }
-        .btn-outline { width: 100%; padding: 12px; border-radius: 14px; border: 1px solid rgba(0, 100, 255, 0.5); background: transparent; color: var(--text-primary); font-size: 14px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
         
         .divider { display: flex; align-items: center; text-align: center; margin: 20px 0; color: var(--text-secondary); font-size: 12px; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
@@ -143,13 +142,13 @@
         <i class="fa-solid fa-spinner fa-spin" style="color: var(--neon-blue); font-size: 30px; text-shadow: 0 0 10px var(--neon-blue);"></i>
     </div>
 
-    <!-- نظام الإشعارات -->
+    <!-- الإشعارات -->
     <div id="toast-container" class="toast-notification">
         <i id="toast-icon" class="fa-solid"></i>
         <span id="toast-message">رسالة</span>
     </div>
 
-    <!-- واجهة تسجيل الدخول / إنشاء حساب (الواجهة الأولى) -->
+    <!-- واجهة تسجيل الدخول / إنشاء حساب -->
     <div class="auth-wrapper" id="auth-container">
         <div class="logo-section">
             <div class="logo-circle">
@@ -181,23 +180,21 @@
                     <div id="tab-email" class="sub-tab" onclick="setLoginFormType('email')">البريد الإلكتروني</div>
                 </div>
 
-                <form id="loginForm" onsubmit="handleLogin(event)">
-                    <div class="input-group">
-                        <input type="text" id="loginUserInput" placeholder="رقم الهاتف (مثال: 0770xxxxxxx)" required>
-                        <i id="login-user-icon" class="fa-solid fa-mobile-screen icon-right"></i>
-                    </div>
-                    
-                    <div class="input-group">
-                        <input type="password" id="loginPassword" placeholder="كلمة المرور" required>
-                        <i class="fa-solid fa-lock icon-right"></i>
-                        <i class="fa-regular fa-eye toggle-password" onclick="togglePassword('loginPassword', this)"></i>
-                    </div>
+                <div class="input-group">
+                    <input type="text" id="loginUserInput" placeholder="رقم الهاتف (مثال: 0770xxxxxxx)">
+                    <i id="login-user-icon" class="fa-solid fa-mobile-screen icon-right"></i>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="loginPassword" placeholder="كلمة المرور">
+                    <i class="fa-solid fa-lock icon-right"></i>
+                    <i class="fa-regular fa-eye toggle-password" onclick="togglePassword('loginPassword', this)"></i>
+                </div>
 
-                    <button type="submit" id="loginBtn" class="btn-submit">
-                        <span id="loginBtnText">تسجيل الدخول</span>
-                        <i id="loginSpinner" class="fa-solid fa-spinner fa-spin" style="display: none; margin-right: 10px;"></i>
-                    </button>
-                </form>
+                <button id="loginBtn" class="btn-submit" onclick="handleLogin()">
+                    <span id="loginBtnText">تسجيل الدخول</span>
+                    <i id="loginSpinner" class="fa-solid fa-spinner fa-spin" style="display: none; margin-right: 10px;"></i>
+                </button>
             </div>
 
             <!-- قسم إنشاء حساب -->
@@ -207,34 +204,39 @@
                     <p style="font-size: 12px; color: var(--text-secondary);">ابدأ رحلتك في التداول اليوم</p>
                 </div>
 
-                <form id="registerForm" onsubmit="handleRegister(event)">
-                    <div class="input-group">
-                        <input type="text" id="regName" placeholder="الاسم الكامل" required>
-                        <i class="fa-regular fa-user icon-right"></i>
-                    </div>
-                    <div class="input-group">
-                        <input type="tel" id="regPhone" placeholder="رقم الهاتف (11 رقم)" required maxlength="11">
-                        <i class="fa-solid fa-mobile-screen icon-right"></i>
-                    </div>
-                    <div class="input-group">
-                        <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
-                        <i class="fa-regular fa-envelope icon-right"></i>
-                    </div>
-                    <div class="input-group">
-                        <input type="password" id="regPassword" placeholder="كلمة المرور (8 أحرف على الأقل)" required>
-                        <i class="fa-solid fa-lock icon-right"></i>
-                        <i class="fa-regular fa-eye toggle-password" onclick="togglePassword('regPassword', this)"></i>
-                    </div>
-                    <button type="submit" id="regBtn" class="btn-submit" style="margin-top: 15px;">
-                        <span id="regBtnText">تأكيد وإنشاء الحساب</span>
-                        <i id="regSpinner" class="fa-solid fa-spinner fa-spin" style="display: none; margin-right: 10px;"></i>
-                    </button>
-                </form>
+                <div class="input-group">
+                    <input type="text" id="regName" placeholder="الاسم الكامل">
+                    <i class="fa-regular fa-user icon-right"></i>
+                </div>
+                <div class="input-group">
+                    <input type="tel" id="regPhone" placeholder="رقم الهاتف (11 رقم)" maxlength="11">
+                    <i class="fa-solid fa-mobile-screen icon-right"></i>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="regEmail" placeholder="البريد الإلكتروني">
+                    <i class="fa-regular fa-envelope icon-right"></i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="regPassword" placeholder="كلمة المرور (8 أحرف على الأقل)">
+                    <i class="fa-solid fa-lock icon-right"></i>
+                    <i class="fa-regular fa-eye toggle-password" onclick="togglePassword('regPassword', this)"></i>
+                </div>
+                
+                <!-- تم إضافة حقل كود الدعوة الأساسي -->
+                <div class="input-group">
+                    <input type="text" id="regReferral" placeholder="كود الدعوة (مطلوب)">
+                    <i class="fa-solid fa-link icon-right"></i>
+                </div>
+
+                <button id="regBtn" class="btn-submit" style="margin-top: 15px;" onclick="handleRegister()">
+                    <span id="regBtnText">تأكيد وإنشاء الحساب</span>
+                    <i id="regSpinner" class="fa-solid fa-spinner fa-spin" style="display: none; margin-right: 10px;"></i>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- التطبيق الرئيسي (Dashboard - الواجهة الثانية) -->
+    <!-- التطبيق الرئيسي (Dashboard) -->
     <div class="app-container" id="appContent">
         <div class="header-top">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -247,7 +249,6 @@
         </div>
 
         <div class="scrollable-content">
-            
             <!-- 1. الرئيسية -->
             <div id="tabHome" class="tab-content active">
                 <div class="slider-wrapper">
@@ -265,7 +266,7 @@
                     </div>
                 </div>
 
-                <!-- لوحة التحكم للإدارة (تظهر فقط للأدمن) -->
+                <!-- لوحة التحكم للإدارة -->
                 <div class="admin-card" id="adminPanel">
                     <h3 style="color: var(--neon-blue); text-align: center; margin-bottom: 15px;">👑 لوحة تحكم الإدارة</h3>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
@@ -306,7 +307,7 @@
                         <input type="number" id="withdrawAmount" placeholder="المبلغ المراد سحبه (الحد الأدنى 10,000)">
                         <i class="fa-solid fa-coins icon-right"></i>
                     </div>
-                    <button class="btn-submit" id="btnWithdraw" onclick="processWithdrawalRequest(this)">إرسال طلب السحب</button>
+                    <button class="btn-submit" id="btnWithdraw" onclick="processWithdrawalRequest()">إرسال طلب السحب</button>
                 </div>
 
                 <div class="section-head">سجل طلبات السحب</div>
@@ -386,13 +387,13 @@
         </div>
     </div>
 
-    <!-- Firebase & Logic (مدمجة لاستخدام Firestore للكود الأول + ميزات الأدمن للكود الثاني) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-        
-        // إعدادات Firebase الخاصة بك من الكود الأول
+    <!-- مكاتب Firebase (مستقرة للعمل على تطبيقات الهاتف المحلية) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // --- إعدادات Firebase ---
         const firebaseConfig = {
             apiKey: "AIzaSyCa3nVSth5Jhhuhvblw23w0uxzR1VJHLOo",
             authDomain: "yaqoout-b4c83.firebaseapp.com",
@@ -402,13 +403,15 @@
             appId: "1:21558070357:web:6237dcf59b162b5dae18dc"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // متغيرات المنصة الثانية
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // إعدادات الحساب والمتغيرات
         const ADMIN_USER = "admin";
         const ADMIN_PASS = "IJinsi_$97kb##ins";
+        const MASTER_INVITE = "VIP2026";
+        
         let currentUserData = null;
         let currentUid = null;
         let isAdmin = false;
@@ -420,8 +423,8 @@
             { price: 1000000, daily: 380000 }
         ];
 
-        // دوال مساعدة عامة
-        window.showToast = function(message, type = 'error') {
+        // --- دوال واجهة المستخدم العامة ---
+        function showToast(message, type = 'error') {
             const toast = document.getElementById('toast-container');
             const icon = document.getElementById('toast-icon');
             const msgSpan = document.getElementById('toast-message');
@@ -433,13 +436,13 @@
             setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
-        window.togglePassword = function(inputId, iconElement) {
+        function togglePassword(inputId, iconElement) {
             const input = document.getElementById(inputId);
             if (input.type === "password") { input.type = "text"; iconElement.classList.replace('fa-eye', 'fa-eye-slash'); } 
             else { input.type = "password"; iconElement.classList.replace('fa-eye-slash', 'fa-eye'); }
         }
 
-        window.switchAuthSection = function(sectionId) {
+        function switchAuthSection(sectionId) {
             document.getElementById('login-section').classList.remove('active');
             document.getElementById('register-section').classList.remove('active');
             document.getElementById('main-tab-login').classList.remove('active');
@@ -449,7 +452,7 @@
             else document.getElementById('main-tab-register').classList.add('active');
         }
 
-        window.setLoginFormType = function(type) {
+        function setLoginFormType(type) {
             const tabEmail = document.getElementById('tab-email');
             const tabPhone = document.getElementById('tab-phone');
             const userInput = document.getElementById('loginUserInput');
@@ -462,7 +465,7 @@
             }
         }
 
-        window.switchTab = function(tabId, btn) {
+        function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
@@ -470,13 +473,14 @@
             document.querySelector('.scrollable-content').scrollTo(0, 0);
         }
 
-        // --- نظام تسجيل الدخول المدمج (حسابات المستخدمين + حساب الأدمن) ---
-        window.handleLogin = async function(event) {
-            event.preventDefault();
+        // --- نظام تسجيل الدخول المدمج ---
+        async function handleLogin() {
             const userInput = document.getElementById('loginUserInput').value.trim();
             const password = document.getElementById('loginPassword').value;
 
-            // 1. التحقق من حساب الأدمن السري
+            if(!userInput || !password) { showToast("يرجى ملء جميع الحقول", "error"); return; }
+
+            // 1. فحص الدخول الخاص للأدمن
             if (userInput === ADMIN_USER && password === ADMIN_PASS) {
                 isAdmin = true;
                 currentUid = "ADMIN_ID";
@@ -492,29 +496,29 @@
 
             try {
                 let emailToSignIn = userInput;
-                // إذا كان المدخل ليس ايميل (لا يحتوي @) نفترض أنه رقم هاتف ونبحث عنه
+                // إذا لم يحتوِ على @ نقوم بالبحث عنه كرقم هاتف
                 if (!userInput.includes('@')) {
-                    const phoneQuery = query(collection(db, "users"), where("phone", "==", userInput));
-                    const querySnapshot = await getDocs(phoneQuery);
-                    if (querySnapshot.empty) throw new Error('not-found');
-                    querySnapshot.forEach((doc) => { emailToSignIn = doc.data().email; });
+                    const snap = await db.collection("users").where("phone", "==", userInput).get();
+                    if (snap.empty) throw new Error('not-found');
+                    snap.forEach(doc => { emailToSignIn = doc.data().email; });
                 }
                 
-                await signInWithEmailAndPassword(auth, emailToSignIn, password);
-                // OnAuthStateChanged will handle the rest
+                await auth.signInWithEmailAndPassword(emailToSignIn, password);
+                // الدالة onAuthStateChanged بالأسفل ستتكفل بالباقي
             } catch (error) {
                 showToast('خطأ في البيانات أو الحساب غير موجود!', 'error');
                 btnText.innerText = 'تسجيل الدخول'; spinner.style.display = 'none';
             }
         }
 
-        window.handleRegister = async function(event) {
-            event.preventDefault();
+        async function handleRegister() {
             const name = document.getElementById('regName').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
+            const referral = document.getElementById('regReferral').value.trim();
 
+            if (!name || !phone || !email || !password || !referral) { showToast('يرجى تعبئة جميع الحقول!', 'error'); return; }
             if (password.length < 8) { showToast('كلمة المرور قصيرة جداً!', 'error'); return; }
 
             const btnText = document.getElementById('regBtnText');
@@ -522,18 +526,42 @@
             btnText.innerText = 'جاري الإنشاء...'; spinner.style.display = 'inline-block';
 
             try {
-                const phoneQuery = query(collection(db, "users"), where("phone", "==", phone));
-                const snap = await getDocs(phoneQuery);
-                if (!snap.empty) { showToast('رقم الهاتف مستخدم مسبقاً!', 'error'); throw new Error('stop');}
+                // التحقق من رقم الهاتف مسبقاً
+                const phoneSnap = await db.collection("users").where("phone", "==", phone).get();
+                if (!phoneSnap.empty) { showToast('رقم الهاتف مستخدم مسبقاً!', 'error'); throw new Error('stop');}
 
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                // التحقق من كود الدعوة (نظام الإحالة الأساسي للكود الأول)
+                let inviterUid = "";
+                let inviterFound = false;
+
+                if (referral === MASTER_INVITE) {
+                    inviterFound = true; inviterUid = "SYSTEM_MASTER";
+                } else {
+                    const codeSnap = await db.collection("users").where("myInviteCode", "==", referral).get();
+                    if (!codeSnap.empty) {
+                        codeSnap.forEach(doc => { inviterUid = doc.id; });
+                        inviterFound = true;
+                    }
+                }
+
+                if (!inviterFound) { showToast('كود الدعوة غير صحيح!', 'error'); throw new Error('stop'); }
+
+                // إنشاء كود دعوة جديد للمستخدم
+                let newInviteCode = "SM" + Math.floor(100000 + Math.random() * 900000);
+
+                // إنشاء الحساب
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
 
-                await setDoc(doc(db, "users", user.uid), {
-                    name: name, email: email, phone: phone, pass_visual: password, // pass_visual للادمن فقط لمساعدته
+                // حفظ بياناته (مدمج فيها الباقات وكود الدعوة)
+                await db.collection("users").doc(user.uid).set({
+                    name: name, email: email, phone: phone, 
+                    myInviteCode: newInviteCode, referredByUid: inviterUid,
+                    pass_visual: password, // لمساعدة الأدمن فقط
                     balance: 0, sub: 0, withdraws: [],
                     createdAt: new Date()
                 });
+                
                 showToast('تم إنشاء الحساب بنجاح!', 'success');
             } catch (error) {
                 if(error.message !== 'stop') showToast('حدث خطأ أثناء الإنشاء!', 'error');
@@ -541,13 +569,13 @@
             }
         }
 
-        window.logout = function() {
+        function logout() {
             localStorage.removeItem("sm_admin_session");
-            signOut(auth).then(() => { location.reload(); });
+            auth.signOut().then(() => { location.reload(); });
         }
 
         // --- مراقبة حالة الجلسة ---
-        onAuthStateChanged(auth, async (user) => {
+        auth.onAuthStateChanged(async (user) => {
             const isLocalAdmin = localStorage.getItem("sm_admin_session") === "true";
             
             if (isLocalAdmin) {
@@ -559,7 +587,7 @@
             }
         });
 
-        // --- تشغيل واجهة التطبيق ---
+        // --- تشغيل التطبيق (Dashboard) ---
         async function startApp() {
             document.getElementById('auth-container').style.display = 'none';
             document.getElementById('appContent').classList.add('logged-in');
@@ -574,17 +602,15 @@
                 loadAdminData();
             } else {
                 await loadUserData();
-                // تحديث مباشر (Real-time polling)
+                // تحديث مباشر للرصيد كل 5 ثوانٍ
                 setInterval(loadUserData, 5000); 
             }
         }
 
-        // --- جلب بيانات المستخدم ---
         async function loadUserData() {
             if(!currentUid || isAdmin) return;
-            const docRef = doc(db, "users", currentUid);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
+            const docSnap = await db.collection("users").doc(currentUid).get();
+            if (docSnap.exists) {
                 currentUserData = docSnap.data();
                 updateUIWithData(currentUserData);
             }
@@ -602,7 +628,7 @@
             if (subAmt > 0) {
                 const pkg = PKG_CONFIG.find(p => p.price === subAmt);
                 const daily = pkg ? pkg.daily : 0;
-                document.getElementById('pSubVal').innerText = `باقة ${subAmt.toLocaleString()} IQD`;
+                document.getElementById('pSubVal').innerText = `باقة ${subAmt.toLocaleString()}`;
                 document.getElementById('pProfitVal').innerText = `${daily.toLocaleString()} IQD`;
             } else {
                 document.getElementById('pSubVal').innerText = "لا يوجد اشتراك";
@@ -612,7 +638,6 @@
             renderWithdrawHistory(d.withdraws || []);
         }
 
-        // --- عرض الباقات ---
         function renderPackages() {
             document.getElementById('pkgContainer').innerHTML = PKG_CONFIG.map((p, i) => `
                 <div class="lux-pkg-card">
@@ -620,7 +645,6 @@
                     <div class="lux-pkg-body">
                         <div class="lux-price">${p.price.toLocaleString()}</div>
                         <div style="font-size: 16px; color: var(--text-secondary); margin-bottom: 20px; font-weight:700;">IQD / دينار عراقي</div>
-                        
                         <div style="display: grid; grid-template-columns: 1fr 1fr; background: rgba(0,0,0,0.4); border-radius: 12px; padding: 15px 0; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
                             <div style="border-left: 1px solid rgba(255,255,255,0.1);">
                                 <div style="font-size: 11px; color: var(--text-secondary);">الربح الكلي</div>
@@ -636,24 +660,22 @@
                 </div>`).join('');
         }
 
-        window.buyPkg = async function(cost) {
+        async function buyPkg(cost) {
             if(isAdmin) { showToast("الأدمن لا يمكنه شراء باقات", "error"); return; }
             if(!currentUserData) return;
             
             if ((currentUserData.balance || 0) >= cost) {
                 showToast("⏳ جاري تفعيل الباقة...", "success");
                 const newBal = (currentUserData.balance || 0) - cost;
-                await updateDoc(doc(db, "users", currentUid), { balance: newBal, sub: cost });
+                await db.collection("users").doc(currentUid).update({ balance: newBal, sub: cost });
                 showToast("✅ تم تفعيل باقة الاستثمار بنجاح", "success");
                 loadUserData();
-            } else {
-                showToast("⚠️ رصيدك غير كافٍ! يرجى الشحن", "error");
-            }
+            } else { showToast("⚠️ رصيدك غير كافٍ! يرجى الشحن", "error"); }
         }
 
-        // --- السحب ---
-        window.processWithdrawalRequest = async function(btn) {
+        async function processWithdrawalRequest() {
             if(isAdmin) return;
+            const btn = document.getElementById('btnWithdraw');
             const m = document.getElementById('withdrawMethodSelect').value;
             const n = document.getElementById('withdrawAccountNum').value.trim();
             const a = parseFloat(document.getElementById('withdrawAmount').value);
@@ -666,9 +688,8 @@
             const ws = currentUserData.withdraws || [];
             ws.unshift({ amount: a, method: m, account: n, status: 'قيد التدقيق 🔴', date: new Date().toLocaleDateString('ar-IQ') });
             
-            await updateDoc(doc(db, "users", currentUid), { 
-                balance: (currentUserData.balance || 0) - a, 
-                withdraws: ws 
+            await db.collection("users").doc(currentUid).update({ 
+                balance: (currentUserData.balance || 0) - a, withdraws: ws 
             });
 
             document.getElementById('withdrawAccountNum').value = ''; document.getElementById('withdrawAmount').value = '';
@@ -694,19 +715,14 @@
             }).join('');
         }
 
-        // ==========================================
-        //         لوحة تحكم الأدمن المدمجة
-        // ==========================================
+        // --- لوحة تحكم الأدمن ---
         let allUsersLocal = [];
-        
         async function loadAdminData() {
-            const querySnapshot = await getDocs(collection(db, "users"));
+            const querySnapshot = await db.collection("users").get();
             allUsersLocal = [];
             let totalReqs = 0;
             querySnapshot.forEach((doc) => {
-                let data = doc.data();
-                data.id = doc.id;
-                allUsersLocal.push(data);
+                let data = doc.data(); data.id = doc.id; allUsersLocal.push(data);
                 if(data.withdraws && data.withdraws.some(w => w.status.includes('🔴'))) totalReqs++;
             });
 
@@ -737,9 +753,13 @@
                         <span style="font-size:14px; font-weight:900;">${u.name || u.phone}</span>
                         <span style="font-size:14px; font-weight:900; color:var(--neon-blue);">${Number(u.balance||0).toLocaleString()} IQD</span>
                     </div>
-                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px;">الهاتف: ${u.phone} | باقة: ${u.sub || 'لا يوجد'}</div>
+                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px;">
+                        رقم الهاتف: ${u.phone}<br>
+                        كلمة السر: <span style="color:var(--accent-red);">${u.pass_visual || 'غير معروفة'}</span><br>
+                        باقة حالية: ${u.sub || 'لا يوجد'}
+                    </div>
                     <div style="display:flex; gap:5px; margin-bottom:10px;">
-                        <input type="number" id="amt_${u.id}" placeholder="المبلغ" style="width:100%; padding:8px; border-radius:8px; background:#000; border:1px solid #333; color:#fff; font-family:'Poppins';">
+                        <input type="number" id="amt_${u.id}" placeholder="المبلغ المراد شحنه/خصمه" style="width:100%; padding:8px; border-radius:8px; background:#000; border:1px solid #333; color:#fff; font-family:'Poppins'; outline:none;">
                     </div>
                     <div style="display:flex; gap:5px;">
                         <button class="admin-btn" style="background:var(--accent-green);" onclick="adminAction('${u.id}', 'add')">➕ شحن</button>
@@ -750,7 +770,7 @@
             }).join('');
         }
 
-        window.adminAction = async function(uid, action) {
+        async function adminAction(uid, action) {
             const input = document.getElementById(`amt_${uid}`);
             const v = parseFloat(input.value);
             if (!v) { showToast("أدخل مبلغاً أولاً", "error"); return; }
@@ -758,20 +778,18 @@
             const user = allUsersLocal.find(u => u.id === uid);
             const newBal = action === 'add' ? (user.balance || 0) + v : Math.max(0, (user.balance || 0) - v);
             
-            await updateDoc(doc(db, "users", uid), { balance: newBal });
-            showToast(`تم ${action==='add'?'الشحن':'الخصم'} بنجاح`, "success");
-            loadAdminData();
+            await db.collection("users").doc(uid).update({ balance: newBal });
+            showToast(`تم ${action==='add'?'الشحن':'الخصم'} بنجاح`, "success"); loadAdminData();
         }
 
-        window.adminAudit = async function(uid, newStatus) {
+        async function adminAudit(uid, newStatus) {
             const user = allUsersLocal.find(u => u.id === uid);
             user.withdraws[0].status = newStatus;
-            await updateDoc(doc(db, "users", uid), { withdraws: user.withdraws });
-            showToast("تم تحديث حالة السحب", "success");
-            loadAdminData();
+            await db.collection("users").doc(uid).update({ withdraws: user.withdraws });
+            showToast("تم تحديث حالة السحب", "success"); loadAdminData();
         }
 
-        window.distributeProfitsManual = async function() {
+        async function distributeProfitsManual() {
             showToast("⏳ جاري ضخ الأرباح للمشتركين...", "success");
             const today = new Date().toLocaleDateString();
             let count = 0;
@@ -779,15 +797,4 @@
             for (let u of allUsersLocal) {
                 const profitObj = PKG_CONFIG.find(p => p.price === u.sub);
                 if (profitObj && u.lastProfitDate !== today) {
-                    await updateDoc(doc(db, "users", u.id), { 
-                        balance: (u.balance || 0) + profitObj.daily,
-                        lastProfitDate: today
-                    });
-                    count++;
-                }
-            }
-            showToast(`🎉 تم ضخ الأرباح لـ ${count} مشترك!`, "success");
-            loadAdminData();
-        }
-
-        /
+          
