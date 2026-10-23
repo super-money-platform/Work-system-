@@ -1,1 +1,727 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>منصة العمليات المركزية | Enterprise Executive Portal</title>
+    <!-- خط Tajawal الهندسي الرسمي المريح للعين -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        ::selection { background: #38bdf8; color: #0f172a; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0ea5e9; }
 
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: #0b0f19;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 24px 16px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* خلفية هادئة وبدون إضاءة نيون مجهدة */
+        .ambient-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; pointer-events: none; z-index: -1;
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0b0f19 75%);
+        }
+
+        .promoter-card {
+            width: 100%; max-width: 460px;
+            background: #1e293b;
+            padding: 32px 26px 26px 26px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-container {
+            position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #0ea5e9, #10b981);
+            transition: width 0.4s ease;
+        }
+
+        .system-status {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 12px; font-weight: 700; color: #94a3b8;
+            background: rgba(255, 255, 255, 0.03); padding: 6px 14px;
+            border-radius: 20px; width: fit-content; margin: 0 auto 20px auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .status-dot {
+            width: 8px; height: 8px; background-color: #10b981; border-radius: 50%;
+        }
+
+        .logo-container { text-align: center; margin-bottom: 24px; }
+        .title {
+            font-size: 22px; font-weight: 800; color: #f8fafc;
+            letter-spacing: -0.3px;
+        }
+        .subtitle { font-size: 11px; color: #38bdf8; font-weight: 700; margin-top: 2px; letter-spacing: 2px; text-transform: uppercase; }
+
+        .section-divider {
+            display: flex; align-items: center; gap: 10px; margin: 20px 0 16px 0;
+            font-size: 11px; font-weight: 700; color: #64748b;
+        }
+        .section-divider::before, .section-divider::after {
+            content: ''; flex: 1; height: 1px; background: rgba(255, 255, 255, 0.08);
+        }
+
+        .input-group { margin-bottom: 16px; position: relative; }
+        .input-label {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;
+        }
+        .input-label .icon { margin-left: 6px; opacity: 0.8; }
+        
+        .badge-official {
+            font-size: 10px; background: rgba(56, 189, 248, 0.1); color: #38bdf8;
+            padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.2);
+            font-weight: 700;
+        }
+        
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .input-control {
+            width: 100%; background: #0f172a; border: 1px solid #334155;
+            color: #f8fafc; font-size: 14px; font-weight: 600; padding: 12px 14px;
+            border-radius: 10px; outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease; appearance: none;
+        }
+        .input-control:hover { border-color: #475569; }
+        .input-control:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+        }
+        .input-group:focus-within .input-label { color: #38bdf8; }
+        .input-control::placeholder { color: #64748b; font-weight: 500; }
+
+        .field-check {
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%) scale(0);
+            width: 18px; height: 18px; background: #10b981; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s ease; pointer-events: none;
+        }
+        .field-check::after {
+            content: ''; width: 4px; height: 8px; border: solid #fff;
+            border-width: 0 2px 2px 0; transform: rotate(45deg); margin-bottom: 2px;
+        }
+        .input-group.valid .field-check { transform: translateY(-50%) scale(1); }
+
+        .custom-select-trigger {
+            cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            user-select: none;
+        }
+        .select-trigger-text { color: #f8fafc; font-weight: 600; }
+        .select-trigger-text.placeholder { color: #64748b; font-weight: 500; }
+
+        .phone-wrapper { position: relative; }
+        .phone-input { padding-left: 14px !important; padding-right: 90px !important; text-align: left; direction: ltr; font-size: 14px; letter-spacing: 0.5px; }
+        .phone-input::placeholder { text-align: left; letter-spacing: 0; }
+        
+        .carrier-badge {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px;
+            opacity: 0; pointer-events: none; color: #fff;
+            transition: opacity 0.2s ease;
+        }
+        .carrier-badge.active { opacity: 1; }
+        
+        /* ألوان مطفأة ومريحة للعين للشركات */
+        .badge-zain { background: #6d28d9; }
+        .badge-asia { background: #b91c1c; }
+        .badge-korek { background: #0369a1; }
+
+        .phone-input.carrier-zain-active { border-color: #6d28d9 !important; }
+        .phone-input.carrier-asia-active { border-color: #b91c1c !important; }
+        .phone-input.carrier-korek-active { border-color: #0369a1 !important; }
+
+        /* نافذة المحافظات MODAL */
+        .gov-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
+            z-index: 9999; display: flex; justify-content: center; align-items: center;
+            padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+        }
+        .gov-modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .gov-modal-card {
+            width: 100%; max-width: 480px; max-height: 85vh;
+            background: #1e293b; border: 1px solid #334155;
+            border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .gov-modal-header {
+            padding: 18px 20px; border-bottom: 1px solid #334155;
+            display: flex; justify-content: space-between; align-items: center;
+            background: #0f172a;
+        }
+        .gov-modal-title { font-size: 15px; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
+        
+        .gov-modal-close {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8; width: 32px; height: 32px; border-radius: 8px; font-size: 14px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .gov-modal-close:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
+
+        .gov-search-container { padding: 12px 20px; background: #1e293b; border-bottom: 1px solid #334155; }
+        .gov-search-input {
+            width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff;
+            padding: 10px 14px; border-radius: 8px; font-size: 13px; outline: none;
+        }
+        .gov-search-input:focus { border-color: #0ea5e9; }
+
+        .gov-modal-body { padding: 18px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+        
+        .gov-region-group { display: flex; flex-direction: column; gap: 10px; }
+        .gov-region-title {
+            font-size: 12px; font-weight: 800; color: #38bdf8;
+            padding-bottom: 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .gov-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        
+        .gov-item-card {
+            background: #0f172a; border: 1px solid #334155;
+            padding: 10px 12px; border-radius: 8px; cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+        .gov-item-card:hover { border-color: #0ea5e9; background: rgba(14, 165, 233, 0.08); }
+        .gov-item-card.selected { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
+        .gov-item-card.selected .gov-item-name { color: #fff; }
+        .gov-item-name { font-size: 12px; font-weight: 700; color: #cbd5e1; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+        .input-group.shake-error .input-control {
+            animation: shake 0.3s ease; border-color: #ef4444 !important; background: rgba(239, 68, 68, 0.08) !important;
+        }
+
+        /* معاينة شبيها بالفاتورة الرسمية الموثقة */
+        .preview-box {
+            background: #0f172a; border: 1px solid #334155;
+            border-radius: 12px; padding: 16px; margin-bottom: 20px; position: relative;
+        }
+        .preview-title {
+            font-size: 10px; color: #10b981; font-weight: 800; margin-bottom: 8px;
+            letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;
+        }
+        .preview-content {
+            white-space: pre-wrap; color: #e2e8f0; font-size: 12px; line-height: 1.8; font-weight: 600;
+        }
+
+        .actions-container { display: flex; gap: 10px; }
+        .btn-submit {
+            flex: 2; padding: 12px; background: #10b981; color: #064e3b; border: none;
+            border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-submit:hover { background: #34d399; }
+
+        .btn-copy {
+            flex: 1; padding: 12px; background: #334155; color: #f8fafc;
+            border: 1px solid #475569; border-radius: 10px; font-size: 13px;
+            font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .btn-copy:hover { background: #475569; color: #38bdf8; }
+
+        .wa-icon { width: 18px; height: 18px; fill: #064e3b; }
+
+        #toast {
+            position: fixed; top: -70px; left: 50%; transform: translateX(-50%);
+            background: #ef4444; color: #fff; padding: 10px 20px;
+            border-radius: 10px; font-weight: 700; font-size: 13px; z-index: 99999;
+            opacity: 0; transition: all 0.3s ease; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+        #toast.show { top: 20px; opacity: 1; }
+        #toast.success { background: #10b981; }
+    </style>
+</head>
+<body>
+
+<div class="ambient-bg"></div>
+
+<div id="toast"><span id="toast-msg"></span></div>
+
+<div class="promoter-card" id="promoterCard">
+    <div class="progress-container">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+
+    <div class="system-status">
+        <div class="status-dot"></div>
+        <span>نظام تسجيل الطلبات الموثق</span>
+    </div>
+
+    <div class="logo-container">
+        <h1 class="title">بوابة تسجيل البيانات</h1>
+        <div class="subtitle">ENTERPRISE EXECUTIVE PORTAL</div>
+    </div>
+
+    <form id="promoterForm" novalidate>
+        
+        <div class="section-divider">البيانات الشخصية والاتصال</div>
+
+        <!-- اسم الزبون -->
+        <div class="input-group" id="groupName">
+            <label class="input-label">
+                <span><span class="icon">👤</span>اسم الزبون (الاسم الأول فقط)</span>
+            </label>
+            <div class="input-wrapper">
+                <input type="text" id="customerName" class="input-control" placeholder="أدخل الاسم الأول..." required autocomplete="off" pattern="^[^\s]+$">
+                <div class="field-check"></div>
+            </div>
+        </div>
+
+        <!-- رقم الهاتف -->
+        <div class="input-group" id="groupPhone">
+            <label class="input-label">
+                <span><span class="icon">📞</span>رقم الهاتف المحمول</span>
+            </label>
+            <div class="input-wrapper phone-wrapper">
+                <input type="tel" id="phone" class="input-control phone-input" placeholder="07X XXXX XXXX" maxlength="13" required autocomplete="off">
+                <div id="carrierBadge" class="carrier-badge"></div>
+                <div class="field-check"></div>
+            </div>
+        </div>
+
+        <div class="section-divider">تفاصيل العنوان والطلب</div>
+
+        <!-- المحافظة -->
+        <div class="input-group" id="groupGov">
+            <label class="input-label">
+                <span><span class="icon">📍</span>المحافظة</span>
+                <span class="badge-official">تحديد جغرافي</span>
+            </label>
+            <div class="input-wrapper">
+                <div id="govSelectTrigger" class="input-control custom-select-trigger">
+                    <span id="govSelectText" class="select-trigger-text placeholder">-- انقر لاختيار المحافظة --</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#38bdf8" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <input type="hidden" id="governorate" value="">
+                <div class="field-check"></div>
+            </div>
+        </div>
+
+        <!-- المنطقة -->
+        <div class="input-group" id="groupRegion">
+            <label class="input-label">
+                <span><span class="icon">📥</span>المنطقة أو الحي السكني</span>
+            </label>
+            <div class="input-wrapper">
+                <input type="text" id="region" class="input-control" placeholder="مثال: العشار، المنصور..." required autocomplete="off">
+                <div class="field-check"></div>
+            </div>
+        </div>
+
+        <!-- رقم الطلب -->
+        <div class="input-group" id="groupOrder">
+            <label class="input-label">
+                <span><span class="icon">🔢</span>رقم الطلب المرجعي (أرقام فقط)</span>
+            </label>
+            <div class="input-wrapper">
+                <input type="text" id="orderNumber" inputmode="numeric" pattern="[0-9]+" class="input-control" placeholder="أدخل رقم الطلب..." required autocomplete="off">
+                <div class="field-check"></div>
+            </div>
+        </div>
+
+        <!-- ملاحظة مهمة -->
+        <div class="input-group" id="groupNote">
+            <label class="input-label">
+                <span><span class="icon">📝</span>ملاحظة مهمة</span>
+            </label>
+            <div class="input-wrapper">
+                <input type="text" id="importantNote" class="input-control" placeholder="أدخل أي ملاحظات إضافية إن وجدت..." autocomplete="off">
+                <div class="field-check"></div>
+            </div>
+        </div>
+
+        <!-- معاينة الرسالة -->
+        <div class="preview-box">
+            <div class="preview-title">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                معاينة الإيصال الرقمي
+            </div>
+            <div class="preview-content" id="livePreview">👤 أسم الزبون  :  
+
+📞 رقم الهاتف  : 
+
+📍 المحافظة : 
+
+📥  المنطقة  :  
+
+✅ رقم الطلب  :  
+
+❓ ملاحظة مهمة  :  
+
+-----------------------
+تاريخ الطلب  : </div>
+        </div>
+
+        <div class="actions-container">
+            <button type="button" class="btn-copy" id="copyBtn">نسخ البيانات</button>
+            <button type="submit" class="btn-submit">
+                <svg class="wa-icon" viewBox="0 0 24 24">
+                    <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.758.459 3.474 1.33 4.982L2 22l5.122-1.334c1.455.793 3.097 1.21 4.885 1.211h.005c5.507 0 9.99-4.478 9.99-9.985 0-2.667-1.039-5.174-2.928-7.062A9.917 9.917 0 0 0 12.012 2zm5.836 14.129c-.244.688-1.417 1.314-1.982 1.398-.506.076-1.148.107-1.853-.117-.427-.135-.975-.317-1.677-.621-2.951-1.275-4.88-4.246-5.027-4.442-.146-.196-1.196-1.595-1.196-3.044 0-1.448.762-2.158 1.03-2.453.27-.295.588-.368.784-.368.196 0 .392.001.564.01.18.009.423-.068.663.505.244.588.833 2.037.906 2.185.073.147.122.319.025.515-.098.196-.147.319-.294.491-.147.172-.31.385-.442.516-.147.147-.3.308-.129.602.172.294.762 1.251 1.636 2.03 1.123.998 2.07 1.308 2.364 1.455.294.147.466.123.637-.073.172-.196.735-.858.931-1.152.196-.295.392-.245.686-.147.294.098 1.861.877 2.18 1.036.319.159.53.235.603.358.073.123.073.712-.171 1.401z"/>
+                </svg>
+                <span>إرسال فوري</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- النافذة المنبثقة للمحافظات مع البحث السريع -->
+<div class="gov-modal-overlay" id="govModal">
+    <div class="gov-modal-card">
+        <div class="gov-modal-header">
+            <div class="gov-modal-title">
+                <span>📍</span>
+                <span>اختر المحافظة</span>
+            </div>
+            <button type="button" class="gov-modal-close" id="closeGovModal">✕</button>
+        </div>
+        <div class="gov-search-container">
+            <input type="text" id="govSearchInput" class="gov-search-input" placeholder="🔍 بحث سريع عن المحافظة...">
+        </div>
+        <div class="gov-modal-body" id="govModalBody">
+            
+            <div class="gov-region-group">
+                <div class="gov-region-title">العاصمة والوسط</div>
+                <div class="gov-grid">
+                    <div class="gov-item-card" data-value="بغداد (العاصمة)"><span class="gov-item-name">بغداد (العاصمة)</span></div>
+                    <div class="gov-item-card" data-value="ديالى (بعقوبة)"><span class="gov-item-name">ديالى (بعقوبة)</span></div>
+                    <div class="gov-item-card" data-value="الأنبار (الرمادي)"><span class="gov-item-name">الأنبار (الرمادي)</span></div>
+                </div>
+            </div>
+
+            <div class="gov-region-group">
+                <div class="gov-region-title">الفرات الأوسط</div>
+                <div class="gov-grid">
+                    <div class="gov-item-card" data-value="بابل (الحلة)"><span class="gov-item-name">بابل (الحلة)</span></div>
+                    <div class="gov-item-card" data-value="كربلاء المقدسة (كربلاء)"><span class="gov-item-name">كربلاء المقدسة</span></div>
+                    <div class="gov-item-card" data-value="النجف الأشرف (النجف)"><span class="gov-item-name">النجف الأشرف</span></div>
+                    <div class="gov-item-card" data-value="القادسية (الديوانية)"><span class="gov-item-name">القادسية (الديوانية)</span></div>
+                    <div class="gov-item-card" data-value="واسط (الكوت)"><span class="gov-item-name">واسط (الكوت)</span></div>
+                </div>
+            </div>
+
+            <div class="gov-region-group">
+                <div class="gov-region-title">الجنوب</div>
+                <div class="gov-grid">
+                    <div class="gov-item-card" data-value="البصرة (الفيحاء)"><span class="gov-item-name">البصرة (الفيحاء)</span></div>
+                    <div class="gov-item-card" data-value="ذي قار (الناصرية)"><span class="gov-item-name">ذي قار (الناصرية)</span></div>
+                    <div class="gov-item-card" data-value="ميسان (العمارة)"><span class="gov-item-name">ميسان (العمارة)</span></div>
+                    <div class="gov-item-card" data-value="المثنى (السماوة)"><span class="gov-item-name">المثنى (السماوة)</span></div>
+                </div>
+            </div>
+
+            <div class="gov-region-group">
+                <div class="gov-region-title">الشمال وإقليم كردستان</div>
+                <div class="gov-grid">
+                    <div class="gov-item-card" data-value="نينوى (الموصل)"><span class="gov-item-name">نينوى (الموصل)</span></div>
+                    <div class="gov-item-card" data-value="كركوك"><span class="gov-item-name">كركوك</span></div>
+                    <div class="gov-item-card" data-value="صلاح الدين (تكريت)"><span class="gov-item-name">صلاح الدين (تكريت)</span></div>
+                    <div class="gov-item-card" data-value="أربيل"><span class="gov-item-name">أربيل</span></div>
+                    <div class="gov-item-card" data-value="السليمانية"><span class="gov-item-name">السليمانية</span></div>
+                    <div class="gov-item-card" data-value="دهوك"><span class="gov-item-name">دهوك</span></div>
+                    <div class="gov-item-card" data-value="حلبجة"><span class="gov-item-name">حلبجة</span></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function showToast(message, isSuccess = false) {
+        if (navigator.vibrate) navigator.vibrate(30);
+        const toast = document.getElementById('toast');
+        const msg = document.getElementById('toast-msg');
+        msg.innerText = message;
+        toast.className = isSuccess ? 'show success' : 'show';
+        setTimeout(() => toast.className = '', 2800);
+    }
+
+    function triggerStructuralShake(elementId) {
+        const group = document.getElementById(elementId);
+        group.classList.add('shake-error');
+        if (navigator.vibrate) navigator.vibrate([40, 40]);
+        setTimeout(() => group.classList.remove('shake-error'), 350);
+    }
+
+    const nameInput = document.getElementById('customerName');
+    const phoneInput = document.getElementById('phone');
+    const govInput = document.getElementById('governorate');
+    const govSelectTrigger = document.getElementById('govSelectTrigger');
+    const govSelectText = document.getElementById('govSelectText');
+    const regionInput = document.getElementById('region');
+    const orderInput = document.getElementById('orderNumber');
+    const noteInput = document.getElementById('importantNote');
+    const carrierBadge = document.getElementById('carrierBadge');
+    const livePreview = document.getElementById('livePreview');
+
+    const govModal = document.getElementById('govModal');
+    const closeGovModal = document.getElementById('closeGovModal');
+    const govItemCards = document.querySelectorAll('.gov-item-card');
+    const govSearchInput = document.getElementById('govSearchInput');
+
+    govSelectTrigger.addEventListener('click', () => {
+        govModal.classList.add('active');
+        govSearchInput.value = '';
+        filterGovernorates('');
+        govSearchInput.focus();
+    });
+    
+    closeGovModal.addEventListener('click', () => govModal.classList.remove('active'));
+    govModal.addEventListener('click', (e) => { if (e.target === govModal) govModal.classList.remove('active'); });
+
+    // تصفية المحافظات بالبحث
+    govSearchInput.addEventListener('input', function() {
+        filterGovernorates(this.value.trim().toLowerCase());
+    });
+
+    function filterGovernorates(query) {
+        govItemCards.forEach(card => {
+            const val = card.getAttribute('data-value').toLowerCase();
+            if (val.includes(query)) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    govItemCards.forEach(item => {
+        item.addEventListener('click', function() {
+            const val = this.getAttribute('data-value');
+            govInput.value = val;
+            govSelectText.innerText = val;
+            govSelectText.classList.remove('placeholder');
+
+            govItemCards.forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+
+            govModal.classList.remove('active');
+            updateSystemState();
+        });
+    });
+
+    // الاسم الأول فقط بدون مسافات
+    nameInput.addEventListener('keydown', function(e) {
+        if (e.key === ' ') e.preventDefault();
+    });
+
+    // أرقام فقط لرقم الطلب
+    orderInput.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '');
+        updateSystemState();
+    });
+
+    // توقيت العراق بالأرقام الإنجليزية (0-9)
+    function getIraqTimestampEnglishDigits() {
+        const now = new Date();
+        const options = {
+            timeZone: 'Asia/Baghdad',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        };
+        return new Intl.DateTimeFormat('en-US', options).format(now);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if(localStorage.getItem('ent_name')) nameInput.value = localStorage.getItem('ent_name');
+        if(localStorage.getItem('ent_phone')) phoneInput.value = localStorage.getItem('ent_phone');
+        if(localStorage.getItem('ent_gov')) {
+            const savedGov = localStorage.getItem('ent_gov');
+            govInput.value = savedGov;
+            govSelectText.innerText = savedGov;
+            govSelectText.classList.remove('placeholder');
+            govItemCards.forEach(c => {
+                if(c.getAttribute('data-value') === savedGov) c.classList.add('selected');
+            });
+        }
+        if(localStorage.getItem('ent_region')) regionInput.value = localStorage.getItem('ent_region');
+        if(localStorage.getItem('ent_order')) orderInput.value = localStorage.getItem('ent_order');
+        if(localStorage.getItem('ent_note')) noteInput.value = localStorage.getItem('ent_note');
+        
+        phoneInput.dispatchEvent(new Event('input')); 
+        updateSystemState();
+    });
+
+    function generateFormattedMessage(name, phone, gov, region, orderNum, note) {
+        const currentIraqTime = getIraqTimestampEnglishDigits();
+        return `👤 أسم الزبون  :  ${name}\n\n📞 رقم الهاتف  : ${phone}\n\n📍 المحافظة : ${gov}\n\n📥  المنطقة  :  ${region}\n\n✅ رقم الطلب  :  ${orderNum}\n\n❓ ملاحظة مهمة  :  ${note}\n\n-----------------------\nتاريخ الطلب  : ${currentIraqTime}`;
+    }
+
+    function updateSystemState() {
+        const name = nameInput.value.trim();
+        const phone = phoneInput.value.replace(/\s/g, '');
+        const gov = govInput.value || "";
+        const region = regionInput.value.trim();
+        const orderNum = orderInput.value.trim();
+        const note = noteInput.value.trim();
+
+        const isNameValid = name.length > 0 && !name.includes(' ');
+        const isOrderValid = orderNum.length > 0 && /^\d+$/.test(orderNum);
+
+        document.getElementById('groupName').classList.toggle('valid', isNameValid);
+        document.getElementById('groupPhone').classList.toggle('valid', phone.length === 11);
+        document.getElementById('groupGov').classList.toggle('valid', gov.length > 0);
+        document.getElementById('groupRegion').classList.toggle('valid', region.length > 1);
+        document.getElementById('groupOrder').classList.toggle('valid', isOrderValid);
+        document.getElementById('groupNote').classList.toggle('valid', note.length > 0);
+
+        let filledCount = 0;
+        if (isNameValid) filledCount++;
+        if (phone.length === 11) filledCount++;
+        if (gov.length > 0) filledCount++;
+        if (region.length > 1) filledCount++;
+        if (isOrderValid) filledCount++;
+        
+        document.getElementById('progressBarFill').style.width = `${(filledCount / 5) * 100}%`;
+
+        localStorage.setItem('ent_name', name);
+        localStorage.setItem('ent_phone', phoneInput.value);
+        localStorage.setItem('ent_gov', gov);
+        localStorage.setItem('ent_region', region);
+        localStorage.setItem('ent_order', orderNum);
+        localStorage.setItem('ent_note', note);
+
+        livePreview.innerText = generateFormattedMessage(name, phoneInput.value, gov, region, orderNum, note);
+    }
+
+    phoneInput.addEventListener('input', function() {
+        let val = this.value.replace(/\D/g, ''); 
+        carrierBadge.className = 'carrier-badge';
+        this.classList.remove('carrier-zain-active', 'carrier-asia-active', 'carrier-korek-active');
+        
+        if (val.startsWith('078') || val.startsWith('079')) {
+            carrierBadge.innerText = 'زين العراق'; 
+            carrierBadge.classList.add('badge-zain', 'active');
+            this.classList.add('carrier-zain-active');
+        } else if (val.startsWith('077')) {
+            carrierBadge.innerText = 'آسيا سيل'; 
+            carrierBadge.classList.add('badge-asia', 'active');
+            this.classList.add('carrier-asia-active');
+        } else if (val.startsWith('075')) {
+            carrierBadge.innerText = 'كورك'; 
+            carrierBadge.classList.add('badge-korek', 'active');
+            this.classList.add('carrier-korek-active');
+        } else {
+            carrierBadge.classList.remove('active');
+        }
+
+        let formatted = val;
+        if (val.length > 4) formatted = val.slice(0, 4) + ' ' + val.slice(4);
+        if (val.length > 7) formatted = val.slice(0, 4) + ' ' + val.slice(4, 7) + ' ' + val.slice(7, 11);
+        this.value = formatted;
+        updateSystemState();
+    });
+
+    [nameInput, regionInput, noteInput].forEach(el => {
+        el.addEventListener('input', updateSystemState);
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', function() {
+        const textToCopy = livePreview.innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            showToast("تم نسخ البيانات بنجاح", true);
+        });
+    });
+
+    document.getElementById('promoterForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = nameInput.value.trim();
+        const phone = phoneInput.value.replace(/\s/g, ''); 
+        const gov = govInput.value;
+        const region = regionInput.value.trim();
+        const orderNum = orderInput.value.trim();
+        const note = noteInput.value.trim();
+
+        if (!name || name.includes(' ')) { 
+            triggerStructuralShake('groupName'); 
+            showToast("خطأ: يرجى كتابة الاسم الأول فقط"); 
+            return; 
+        }
+        if (phone.length !== 11) { 
+            triggerStructuralShake('groupPhone'); 
+            showToast("خطأ: رقم الهاتف غير متكامل (11 رقم)"); 
+            return; 
+        }
+        if (!gov) { 
+            triggerStructuralShake('groupGov'); 
+            showToast("خطأ: يرجى اختيار المحافظة"); 
+            return; 
+        }
+        if (!region) { 
+            triggerStructuralShake('groupRegion'); 
+            showToast("خطأ: يرجى تحديد المنطقة"); 
+            return; 
+        }
+        if (!orderNum || !/^\d+$/.test(orderNum)) { 
+            triggerStructuralShake('groupOrder'); 
+            showToast("خطأ: رقم الطلب إجباري وتتكون من أرقام فقط"); 
+            return; 
+        }
+
+        const targetWhatsAppNumber = "9647888988288"; 
+        const messageText = generateFormattedMessage(name, phoneInput.value, gov, region, orderNum, note);
+        const encodedMsg = encodeURIComponent(messageText);
+
+        window.location.href = `whatsapp://send?phone=${targetWhatsAppNumber}&text=${encodedMsg}`;
+
+        setTimeout(() => {
+            localStorage.clear();
+            document.getElementById('promoterForm').reset();
+            govInput.value = "";
+            govSelectText.innerText = "-- انقر لاختيار المحافظة --";
+            govSelectText.classList.add('placeholder');
+            govItemCards.forEach(c => c.classList.remove('selected'));
+            carrierBadge.className = 'carrier-badge';
+            phoneInput.classList.remove('carrier-zain-active', 'carrier-asia-active', 'carrier-korek-active');
+            updateSystemState();
+        }, 1000);
+    });
+</script>
+</body>
+                                                                                                                  </html>
